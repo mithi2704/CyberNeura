@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CyberNeura Security Interstitial</title>
+  <link rel="stylesheet" href="interstitial.css">
+</head>
+<body>
+  <div class="interstitial-container">
+    <!-- Header brand -->
+    <header class="interstitial-header">
+      <div class="brand">
+        <span class="brand-shield">🛡️</span>
+        <span class="brand-name">Cyber<span class="accent">Neura</span></span>
+        <span class="badge" id="protectionBadge">Real-Time Protection</span>
+      </div>
+    </header>
+
+    <!-- Main Threat Card -->
+    <main class="threat-card" id="threatCard">
+      <div class="threat-icon-wrapper" id="threatIconWrapper">
+        <span class="threat-icon" id="threatIcon">🛑</span>
+      </div>
+
+      <div class="threat-status-line">
+        <h1 class="threat-title" id="threatTitle">CyberNeura Blocked This Website</h1>
+        <div class="risk-pill" id="riskPill">Risk: 96 / 100</div>
+      </div>
+
+      <p class="target-url-line">
+        Target URL: <span class="url-display" id="urlDisplay">https://malicious-target.xyz</span>
+      </p>
+
+      <div class="threat-meta-grid">
+        <div class="meta-box">
+          <span class="meta-label">Threat Classification</span>
+          <span class="meta-val" id="threatCategory">PHISHING</span>
+        </div>
+        <div class="meta-box">
+          <span class="meta-label">Analysis Confidence</span>
+          <span class="meta-val" id="confidenceVal">94%</span>
+        </div>
+        <div class="meta-box">
+          <span class="meta-label">Decision Policy</span>
+          <span class="meta-val" id="decisionPolicy">CRITICAL BLOCK</span>
+        </div>
+      </div>
+
+      <!-- Explanatory Reasons -->
+      <section class="evidence-section">
+        <h3>Threat Evidence & Reasons</h3>
+        <ul class="reasons-list" id="reasonsList">
+          <li>Machine learning phishing detection matched malicious pattern</li>
+          <li>External threat intelligence feed confirmation</li>
+        </ul>
+      </section>
+
+      <!-- Defensive Guidance -->
+      <section class="recommendations-section">
+        <h3>Recommended Defensive Action</h3>
+        <ul class="recs-list" id="recsList">
+          <li>Do not enter login credentials, passwords, or credit card details.</li>
+          <li>Close this browser tab immediately.</li>
+        </ul>
+      </section>
+
+      <!-- Action Buttons -->
+      <footer class="action-footer">
+        <button type="button" class="btn btn-primary" id="goBackBtn">
+          &larr; Go Back to Safety
+        </button>
+        <button type="button" class="btn btn-secondary hidden" id="continueBtn">
+          Continue Anyway (Unsafe)
+        </button>
+        <button type="button" class="btn btn-ghost" id="viewDashboardBtn">
+          Open CyberNeura Dashboard
+        </button>
+      </footer>
+    </main>
+  </div>
+
+  <script type="module" src="interstitial.ts"></script>
+</body>
+</html>

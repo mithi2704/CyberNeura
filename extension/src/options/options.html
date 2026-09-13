@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CyberNeura Extension Preferences</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="options-container">
+    <header class="options-header">
+      <div class="brand">
+        <span class="shield">🛡️</span>
+        <h1>Cyber<span>Neura</span> <small>Extension Settings</small></h1>
+      </div>
+      <div class="header-status" id="connectionStatus">● Connected</div>
+    </header>
+
+    <main class="settings-grid">
+      <!-- 1. Real-Time Security -->
+      <section class="settings-card">
+        <h2>Real-Time Protection</h2>
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-title">Enable Real-Time Scanning</span>
+            <span class="setting-desc">Analyze web destinations automatically upon browser navigation.</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="protectionToggle" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-title">Enforcement Policy Mode</span>
+            <span class="setting-desc">Balanced permits fail-open browsing if offline; Strict blocks unverified access.</span>
+          </div>
+          <select id="strictModeSelect" class="select-input">
+            <option value="false">Balanced (Recommended)</option>
+            <option value="true">Strict (High Security)</option>
+          </select>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-title">Desktop Notifications</span>
+            <span class="setting-desc">Alert for high-risk phishing and malware attacks.</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="notificationsToggle" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+      </section>
+
+      <!-- 2. Backend & Account -->
+      <section class="settings-card">
+        <h2>Backend Connection & Auth</h2>
+        <div class="form-group">
+          <label for="backendUrlInput">CyberNeura FastAPI Service URL</label>
+          <input type="url" id="backendUrlInput" class="text-input" placeholder="http://localhost:8000" value="http://localhost:8000">
+        </div>
+
+        <div class="form-group">
+          <label for="authTokenInput">Account Authentication Token (Optional)</label>
+          <input type="password" id="authTokenInput" class="text-input" placeholder="Bearer token for organizational attribution">
+        </div>
+
+        <div class="btn-group">
+          <button type="button" class="btn btn-primary" id="saveBtn">Save Preferences</button>
+          <button type="button" class="btn btn-secondary" id="clearCacheBtn">Clear Local Cache</button>
+        </div>
+        <div class="save-toast hidden" id="saveToast">✓ Settings saved successfully!</div>
+      </section>
+
+      <!-- 3. Privacy & Transparency Invariants -->
+      <section class="settings-card privacy-card">
+        <h2>Privacy by Design</h2>
+        <p>CyberNeura operates as a defensive URL security sensor, not an endpoint surveillance tool.</p>
+        <ul class="privacy-list">
+          <li>✓ Only top-level navigation URLs and threat metadata are transmitted to FastAPI.</li>
+          <li>✓ <strong>NO</strong> passwords, form input data, or keystrokes are accessed.</li>
+          <li>✓ <strong>NO</strong> browser cookies, sessions, or credentials are collected.</li>
+          <li>✓ <strong>NO</strong> web page DOM contents or personal browsing history are harvested.</li>
+        </ul>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="options.ts"></script>
+</body>
+</html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CyberNeura Threat Intelligence</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <!-- Top Bar -->
+    <div class="popup-topbar">
+      <div class="brand">
+        <span class="shield-icon">🛡️</span>
+        <span class="brand-title">Cyber<span class="brand-blue">Neura</span></span>
+      </div>
+      <div class="status-badge" id="liveBadge">
+        <span class="dot live"></span>
+        <span id="badgeText">Protected</span>
+      </div>
+    </div>
+
+    <!-- Main Domain & Risk Card -->
+    <div class="site-card" id="siteCard">
+      <div class="site-header">
+        <span class="site-label">CURRENT TARGET</span>
+        <span class="site-domain truncate" id="domainText">Loading current site...</span>
+      </div>
+
+      <div class="metrics-row">
+        <div class="metric-item">
+          <span class="metric-label">RISK SCORE</span>
+          <span class="metric-val text-green" id="riskVal">0 / 100</span>
+        </div>
+        <div class="metric-item">
+          <span class="metric-label">STATUS</span>
+          <span class="metric-val status-pill" id="statusVal">SAFE</span>
+        </div>
+        <div class="metric-item">
+          <span class="metric-label">CONFIDENCE</span>
+          <span class="metric-val" id="confidenceVal">--%</span>
+        </div>
+      </div>
+
+      <div class="meter-bar-container">
+        <div class="meter-fill" id="meterFill" style="width: 0%;"></div>
+      </div>
+    </div>
+
+    <!-- Threat Details & Summary -->
+    <div class="summary-card">
+      <div class="card-title">Intelligence Assessment</div>
+      <p class="summary-text" id="summaryText">
+        CyberNeura is actively monitoring your browsing session in real time.
+      </p>
+      <div class="category-line">
+        Classification: <strong id="categoryVal">Safe</strong>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="actions-grid">
+      <button type="button" class="action-btn" id="refreshBtn" title="Rerun intelligence scan">
+        🔄 Refresh Scan
+      </button>
+      <button type="button" class="action-btn" id="dashboardBtn" title="Open full platform dashboard">
+        📊 Open Dashboard
+      </button>
+      <button type="button" class="action-btn" id="reportBtn" title="Report incorrect security verdict">
+        🚩 Report Result
+      </button>
+      <button type="button" class="action-btn" id="settingsBtn" title="Configure extension preferences">
+        ⚙️ Settings
+      </button>
+    </div>
+
+    <!-- Feedback Reporting Drawer / Modal -->
+    <div class="report-drawer hidden" id="reportDrawer">
+      <div class="drawer-header">
+        <span>Report Security Verdict</span>
+        <button type="button" class="close-btn" id="closeReportBtn">&times;</button>
+      </div>
+      <div class="drawer-body">
+        <select id="reportTypeSelect" class="input-select">
+          <option value="false_positive">False Positive (Safe marked as malicious)</option>
+          <option value="false_negative">False Negative (Malicious marked as safe)</option>
+          <option value="other">Other feedback</option>
+        </select>
+        <textarea id="reportFeedbackText" class="input-textarea" placeholder="Optional context or observations..." rows="2"></textarea>
+        <button type="button" class="btn-submit" id="submitReportBtn">Submit Feedback</button>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="popup-footer">
+      <span id="backendStatus">● Backend Connected</span>
+      <span>v1.0.0</span>
+    </div>
+  </div>
+
+  <script type="module" src="popup.ts"></script>
+</body>
+</html>

@@ -1,0 +1,126 @@
+# ==============================================================================
+# CyberNeura Root .gitignore
+# ==============================================================================
+
+# ── Environment & Secrets ─────────────────────────────────────────────────────
+.env
+.env.*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+!.env.example
+*.pem
+*.key
+*.cert
+serviceAccountKey.json
+
+# ── Large Datasets & Archives ─────────────────────────────────────────────────
+# Raw dataset and training benchmarks exceeding GitHub limits
+archive/
+archive/**
+GenImage-main/
+GenImage-main/**
+PhiUSIIL_Phishing_URL_Dataset.csv
+**/PhiUSIIL_Phishing_URL_Dataset.csv
+top-1m.csv
+**/top-1m.csv
+*.tar.gz
+*.zip
+*.7z
+*.rar
+*.parquet
+*.h5
+
+# Media upload storage
+backend/media_uploads/*
+!backend/media_uploads/.gitkeep
+
+# Keep curated core benchmark dataset tracked
+!backend/ml/datasets/urls.csv
+
+# ── Python / Backend ──────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.pyd
+*.pyo
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environments
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+
+# ── Node.js / Frontend ────────────────────────────────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Production build outputs
+frontend/dist/
+frontend/dist-ssr/
+frontend/.cache/
+*.local
+
+# ── Logs & Temporary Files ────────────────────────────────────────────────────
+logs/
+*.log
+*.tmp
+*.bak
+*.swp
+*.swo
+*~
+
+# ── Operating System & Editors ────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# IDEs
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.sublime-workspace
+*.sublime-project

@@ -1,0 +1,143 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Light Mode */
+    --background: #eef1f8;
+    --foreground: #0f172a;
+    --card: #ffffff;
+    --card-foreground: #0f172a;
+    --popover: #ffffff;
+    --popover-foreground: #0f172a;
+    --primary: #0099bb;
+    --primary-foreground: #ffffff;
+    --secondary: #6d28d9;
+    --secondary-foreground: #ffffff;
+    --muted: #e2e8f0;
+    --muted-foreground: #64748b;
+    --accent: #6d28d9;
+    --accent-foreground: #ffffff;
+    --destructive: #ef4444;
+    --destructive-foreground: #ffffff;
+    --border: #d1d9e6;
+    --input: #f1f5f9;
+    --ring: rgba(0, 153, 187, 0.3);
+    --radius: 0.75rem;
+
+    --cyber-bg: #eef1f8;
+    --cyber-dark: #e2e8f4;
+    --cyber-card: #ffffff;
+    --cyber-card-border: #d1d9e6;
+    --cyber-text: #0f172a;
+    --cyber-muted: #64748b;
+    --cyber-border: #d1d9e6;
+    --cyber-input: #f1f5f9;
+    --cyber-inner: rgba(15, 23, 42, 0.03);
+    --cyber-inner-border: rgba(15, 23, 42, 0.09);
+    --cyber-sidebar: #f8fafc;
+  }
+
+  .dark {
+    /* Dark Mode */
+    --background: #080c18;
+    --foreground: #f3f4f6;
+    --card: rgba(17, 24, 39, 0.7);
+    --card-foreground: #f3f4f6;
+    --popover: #111827;
+    --popover-foreground: #f3f4f6;
+    --primary: #00d4ff;
+    --primary-foreground: #050814;
+    --secondary: #7c3aed;
+    --secondary-foreground: #f3f4f6;
+    --muted: #1f2937;
+    --muted-foreground: #9ca3af;
+    --accent: #7c3aed;
+    --accent-foreground: #f3f4f6;
+    --destructive: #ef4444;
+    --destructive-foreground: #f3f4f6;
+    --border: rgba(255, 255, 255, 0.08);
+    --input: rgba(255, 255, 255, 0.05);
+    --ring: rgba(0, 212, 255, 0.5);
+
+    --cyber-bg: #080c18;
+    --cyber-dark: #050814;
+    --cyber-card: rgba(11, 17, 34, 0.7);
+    --cyber-card-border: rgba(255, 255, 255, 0.08);
+    --cyber-text: #f3f4f6;
+    --cyber-muted: #9ca3af;
+    --cyber-border: rgba(255, 255, 255, 0.08);
+    --cyber-input: rgba(255, 255, 255, 0.05);
+    --cyber-inner: rgba(255, 255, 255, 0.02);
+    --cyber-inner-border: rgba(255, 255, 255, 0.06);
+    --cyber-sidebar: #050814;
+  }
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  overflow-x: hidden;
+  min-height: 100vh;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--cyber-dark); }
+::-webkit-scrollbar-thumb { background: var(--muted); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+
+.glass-panel {
+  background: var(--cyber-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--cyber-card-border);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+.glass-panel-glow-blue {
+  background: var(--cyber-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 212, 255, 0.25);
+  box-shadow: 0 0 15px rgba(0, 212, 255, 0.08);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.glass-panel-glow-purple {
+  background: var(--cyber-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(124, 58, 237, 0.25);
+  box-shadow: 0 0 15px rgba(124, 58, 237, 0.08);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.text-glow        { text-shadow: 0 0 8px rgba(0, 212, 255, 0.5); }
+.text-glow-purple { text-shadow: 0 0 8px rgba(124, 58, 237, 0.5); }
+.border-glow      { box-shadow: 0 0 10px rgba(0, 212, 255, 0.2); }
+
+.cyber-grid {
+  background-image:
+    linear-gradient(var(--cyber-inner-border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--cyber-inner-border) 1px, transparent 1px);
+  background-size: 30px 30px;
+  background-position: center;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.3; box-shadow: 0 0 10px rgba(0, 212, 255, 0.2); }
+  50%       { opacity: 1;   box-shadow: 0 0 20px rgba(0, 212, 255, 0.5); }
+}
+.animate-pulse-glow { animation: pulse-glow 3s infinite; }
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--muted) var(--cyber-dark);
+}
