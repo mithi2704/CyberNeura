@@ -6,6 +6,7 @@
 import { supabase, isSupabaseConfigured } from '../lib/supabase/client';
 import { connectionManager } from './connectionManager';
 import { eventDeduplicator } from './handlers';
+import { aiClient } from '../lib/api/aiService';
 import type { RealtimeEvent, RealtimeEventHandler } from './eventTypes';
 
 class RealtimeClient {
@@ -26,6 +27,14 @@ class RealtimeClient {
     }
 
     connectionManager.setStatus('CONNECTING');
+
+    aiClient.get('/realtime/health').then((res) => {
+      if (res.data?.realtime === 'FALLBACK_IN_MEMORY' || res.data?.database === 'MOCK_OR_DISCONNECTED') {
+        connectionManager.setStatus('DEGRADED');
+      }
+    }).catch(() => {
+      connectionManager.setStatus('DEGRADED');
+    });
   }
 
   /**
@@ -56,7 +65,7 @@ class RealtimeClient {
           if (status === 'SUBSCRIBED') {
             connectionManager.setStatus('CONNECTED');
           } else if (status === 'CLOSED' || status === 'CHANNEL_ERROR') {
-            connectionManager.handleDisconnect(() => this.reconnect());
+            connectionManager.setStatus('DEGRADED');
           }
         });
 

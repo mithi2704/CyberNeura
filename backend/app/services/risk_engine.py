@@ -7,33 +7,48 @@ from __future__ import annotations
 from typing import Dict, Any, List, Optional
 import tldextract
 
+_tld_extractor = tldextract.TLDExtract(suffix_list_urls=None)
+
 from app.config import settings
 from app.intelligence.models import ThreatIntelResult, ProviderVerdict
 
 VERIFIED_AUTHORITY_DOMAINS = {
-    "chatgpt.com", "openai.com", "google.com", "github.com", "microsoft.com",
-    "apple.com", "amazon.com", "wikipedia.org", "cloudflare.com", "linkedin.com",
-    "youtube.com", "twitter.com", "x.com", "netflix.com", "facebook.com",
-    "instagram.com", "meta.com", "anthropic.com", "claude.ai", "python.org",
-    "stackoverflow.com", "reddit.com", "yahoo.com", "bing.com", "zoom.us",
-    "adobe.com", "dropbox.com", "slack.com", "spotify.com", "twitch.tv",
-    "wordpress.org", "mozilla.org", "medium.com", "nytimes.com", "bbc.com",
-    "cnn.com", "forbes.com", "reuters.com", "bloomberg.com", "stripe.com",
-    "paypal.com", "salesforce.com", "gitlab.com", "atlassian.com",
+    # Search, Cloud & Tech infrastructure
+    "google.com", "google.co.in", "google.co.uk", "google.de", "google.fr", "research.google",
+    "microsoft.com", "apple.com", "amazon.com", "cloudflare.com", "cloudflarestream.com",
+    "github.com", "github.io", "githubusercontent.com", "gitlab.com", "atlassian.com",
+    "supabase.com", "canva.com", "huggingface.co", "retool.com", "vercel.app", "netlify.app",
+    "heroku.com", "digitalocean.com", "aws.amazon.com", "azure.com", "googleapis.com", "gstatic.com",
+    # AI & Research platforms
+    "chatgpt.com", "openai.com", "anthropic.com", "claude.ai", "groq.com", "meta.com",
+    # Professional, Developer & Education
+    "linkedin.com", "stackoverflow.com", "reddit.com", "python.org", "ieee.org", "ieeebangalore.org",
+    "skillrack.com", "sairam.edu.in", "portswigger.net", "tranco-list.eu", "openphish.com", "dvwa.co.uk",
+    # Social & Media
+    "youtube.com", "twitter.com", "x.com", "netflix.com", "facebook.com", "instagram.com",
+    "whatsapp.com", "telegram.org", "spotify.com", "twitch.tv", "medium.com", "wikipedia.org",
+    # Business & Enterprise
+    "stripe.com", "paypal.com", "salesforce.com", "zoom.us", "adobe.com", "dropbox.com", "slack.com",
+    "wordpress.org", "wordpress.com", "mozilla.org", "nytimes.com", "bbc.com", "cnn.com", "forbes.com",
+    "reuters.com", "bloomberg.com",
 }
 
 
-def _get_registered_domain(domain: str) -> str:
+def _get_registered_domain(domain_or_url: str) -> str:
     """Extract registered domain (e.g. sub.chatgpt.com -> chatgpt.com)."""
-    if not domain:
+    if not domain_or_url:
         return ""
-    ext = tldextract.extract(domain)
-    reg = getattr(ext, "top_domain_under_public_suffix", None) or getattr(ext, "registered_domain", "")
-    return reg.lower() if reg else domain.lower()
+    clean = domain_or_url.lower().strip()
+    if clean.startswith(("http://", "https://")):
+        clean = clean.split("://", 1)[1].split("/", 1)[0].split("?", 1)[0]
+    ext = _tld_extractor(clean)
+    reg = ext.top_domain_under_public_suffix if hasattr(ext, "top_domain_under_public_suffix") and ext.top_domain_under_public_suffix else ext.domain
+    return reg.lower() if reg else (ext.domain.lower() if ext.domain else clean)
 
 
-def is_verified_authority_domain(domain: str, features: Dict[str, Any]) -> bool:
+def is_verified_authority_domain(domain: str, features: Optional[Dict[str, Any]] = None) -> bool:
     """Check if domain is a globally recognized verified authority with no active spoofing vectors."""
+    features = features or {}
     reg_domain = _get_registered_domain(domain)
     if reg_domain not in VERIFIED_AUTHORITY_DOMAINS:
         return False

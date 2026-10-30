@@ -23,6 +23,9 @@ async def get_stats(user: AuthUser):
         rows = all_scans.data or []
 
         total = len(rows)
+        if total == 0:
+            return scan_store.get_stats()
+
         scans_today = sum(1 for r in rows if str(r.get("scanned_at", "")).startswith(today))
         safe = sum(1 for r in rows if r.get("prediction") == "safe")
         suspicious = sum(1 for r in rows if r.get("prediction") == "suspicious")
@@ -58,6 +61,8 @@ async def get_trends(user: AuthUser):
         since = (datetime.now(timezone.utc) - timedelta(days=7)).isoformat()
         result = db.table("url_scans").select("prediction, scanned_at").gte("scanned_at", since).execute()
         rows = result.data or []
+        if not rows:
+            return {"data": scan_store.get_trends(days=7)}
 
         # Group by day
         by_day: dict = {}
@@ -84,6 +89,9 @@ async def get_distribution(user: AuthUser):
     try:
         result = db.table("url_scans").select("prediction").execute()
         rows = result.data or []
+        if not rows:
+            return {"data": scan_store.get_distribution()}
+
         counts = {"safe": 0, "suspicious": 0, "malicious": 0}
         for r in rows:
             p = r.get("prediction", "safe")

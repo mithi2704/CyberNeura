@@ -1,0 +1,19 @@
+{
+  "model_name": "CyberNeura URL Threat Classifier",
+  "dataset": "urls.csv",
+  "test_samples": 35,
+  "accuracy": 0.9714,
+  "precision": 0.9545,
+  "recall": 1.0,
+  "f1_score": 0.9767,
+  "roc_auc": 0.9762,
+  "pr_auc": 0.9818,
+  "false_positive_rate": 0.0714,
+  "false_negative_rate": 0.0,
+  "confusion_matrix": {
+    "true_negative": 13,
+    "false_positive": 1,
+    "false_negative": 0,
+    "true_positive": 21
+  }
+}

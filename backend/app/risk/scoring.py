@@ -26,6 +26,8 @@ class RiskScoringEngine:
         scan_id: Optional[str] = None,
         evidence_list: List[Evidence],
         correlated_findings: List[CorrelatedFinding],
+        url: Optional[str] = None,
+        domain: Optional[str] = None,
     ) -> Tuple[int, List[RiskFactor]]:
         """
         Compute deterministic risk score and return breakdown of risk factors.
@@ -233,34 +235,65 @@ class RiskScoringEngine:
         total_raw = sum(f.contribution for f in factors)
         raw_score = int(round(total_raw))
 
-        # Check if transport is unencrypted HTTP (missing TLS)
-        is_missing_tls = any(
-            getattr(e.evidence_type, "value", str(e.evidence_type)).lower() in {"missing_tls", "insecure_transport"}
-            or "missing_tls" in e.description.lower()
-            for e in evidence_list if e.supports_risk
-        )
+        # Check for critical lexical and structural spoofing indicators
         has_critical_spoof = any(
             e.evidence_type in {EvidenceType.IP_REPUTATION, EvidenceType.HOSTNAME_ANOMALY}
             for e in evidence_list if e.supports_risk
         )
+        has_phish_indicators = any(
+            e.evidence_type in {EvidenceType.SUSPICIOUS_PATH, EvidenceType.SUSPICIOUS_TLD}
+            or "phish" in e.description.lower()
+            for e in evidence_list if e.supports_risk
+        )
 
-        # Safe HTTPS Invariant: If uses HTTPS with zero threat intel matches,
-        # no IP/homoglyph spoofing, and ML probability < 0.50, score is 0.
-        if not is_missing_tls and not has_verified_match and not has_critical_spoof and ml_norm < 0.50:
-            final_score = 0
-            for f in factors:
-                if f.factor_type != "THREAT_INTELLIGENCE":
-                    f.contribution = 0.0
-                    f.direction = "RISK_DECREASING"
-            return final_score, factors
-
-        # Apply Verified Threat Floor Invariant:
+        # 1. External Threat Intelligence Verified Floor
         if has_verified_match:
             final_score = max(VERIFIED_MATCH_FLOOR, raw_score)
             if len(confirmed_intel) >= 2:
                 final_score = max(94, final_score)
         else:
             final_score = raw_score
+
+        # Check for verified authority domains
+        from app.services.risk_engine import is_verified_authority_domain, _get_registered_domain
+        domain_name = _get_registered_domain(domain or url or "")
+        if not domain_name:
+            dns_ev = next((e for e in evidence_list if e.source == EvidenceSource.DNS), None)
+            if dns_ev and dns_ev.value:
+                domain_name = _get_registered_domain(str(dns_ev.value))
+
+        feat_evs_risk = [e for e in evidence_list if e.source == EvidenceSource.URL_FEATURES and e.supports_risk]
+        feat_dict = {e.evidence_type.value: 1 for e in feat_evs_risk}
+
+        is_auth = bool(domain_name and is_verified_authority_domain(domain_name, feat_dict))
+        if is_auth and not has_verified_match:
+            return 0, factors
+
+        # 2. Machine Learning Elevated Threat Floor:
+        # Zero-day attacks and newly generated links are not yet listed in external blacklist feeds.
+        # When the neural pattern engine detects high malicious probability, elevate the risk score.
+        if ml_norm >= 0.80:
+            ml_floor = int(72 + (ml_norm - 0.80) * 110)  # 0.80 -> 72 (Malicious), 0.90 -> 83, 0.99 -> 93
+            final_score = max(final_score, ml_floor)
+        elif ml_norm >= 0.55:
+            ml_floor = int(45 + (ml_norm - 0.55) * 80)   # 0.55 -> 45 (Suspicious), 0.70 -> 57
+            final_score = max(final_score, ml_floor)
+        elif ml_norm >= 0.35:
+            ml_floor = int(30 + (ml_norm - 0.35) * 60)   # 0.35 -> 30 (Suspicious threshold), 0.45 -> 36
+            final_score = max(final_score, ml_floor)
+
+        # 3. Lexical spoofing / brand impersonation boost
+        if has_critical_spoof:
+            final_score = max(final_score, 75)
+        elif has_phish_indicators and ml_norm >= 0.40:
+            final_score = max(final_score, 60)
+
+        # 4. Legitimate mature domains with clean signals ceiling
+        is_https = bool(url and url.lower().startswith("https://"))
+        mature_domain = any(e.evidence_type == EvidenceType.DOMAIN_AGE and not e.supports_risk for e in evidence_list)
+        has_phish_or_spoof = has_critical_spoof or has_phish_indicators
+        if not has_verified_match and not has_phish_or_spoof and is_https and mature_domain and ml_norm < 0.30:
+            final_score = min(final_score, 10)
 
         # Bound strictly to 0..100
         final_score = max(0, min(100, final_score))

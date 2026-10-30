@@ -1,0 +1,22 @@
+{
+  "model_type": "image_synthetic_detector",
+  "model_name": "CyberNeura Synthetic Detector CNN",
+  "version": "1.1.0",
+  "architecture": "CyberNeuraSyntheticDetectorCNN",
+  "framework": "PyTorch",
+  "num_classes": 2,
+  "classes": [
+    "AI_GENERATED",
+    "REAL"
+  ],
+  "target_mapping": {
+    "0": "AI_GENERATED",
+    "1": "REAL"
+  },
+  "preferred_hf_model": "aaronkantrowitz/ai-image-detection",
+  "alternative_hf_model": "abacusai/Smaug-AI-Image-Detector",
+  "input_size": [3, 32, 32],
+  "dataset": "GenImage-CIFAKE Benchmark (Real vs Synthetic)",
+  "created_at": "2026-10-30"
+}
+

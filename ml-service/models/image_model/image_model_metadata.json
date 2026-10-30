@@ -1,0 +1,22 @@
+{
+  "version": "1.1.0",
+  "model_name": "CyberNeura Synthetic Detector CNN",
+  "framework": "PyTorch",
+  "device": "cpu",
+  "accuracy": 0.9473,
+  "precision": 0.9391,
+  "recall": 0.9567,
+  "f1_score": 0.9478,
+  "roc_auc": 0.9864,
+  "training_samples": 12000,
+  "test_samples": 3000,
+  "training_date": "2026-09-13",
+  "epochs_trained": 5,
+  "best_epoch": 5,
+  "batch_size": 64,
+  "dataset": "GenImage-CIFAKE Benchmark (Real vs Synthetic)",
+  "classes": [
+    "real_authentic",
+    "ai_synthetic"
+  ]
+}

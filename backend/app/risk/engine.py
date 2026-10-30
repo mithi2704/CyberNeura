@@ -44,6 +44,7 @@ class RiskEngine:
             scan_id=scan_id,
             evidence_list=evidence_list,
             correlated_findings=correlated_findings,
+            url=url,
         )
 
         # 2. Count independent external confirmations

@@ -14,6 +14,7 @@ from app.api.routes import (
     health, scan, scans, dashboard, threats,
     insights, notifications, settings as settings_router,
     users, chat, reports, intelligence, risk, evidence, agent, realtime, extension, media,
+    ml_endpoints,
 )
 
 logger = get_logger(__name__)
@@ -91,6 +92,7 @@ app.include_router(agent.router)            # /agent/*
 app.include_router(realtime.router)         # /realtime/*
 app.include_router(extension.router)        # /extension/*
 app.include_router(media.router)            # /media/*
+app.include_router(ml_endpoints.router)     # /models/info, /scan/url, /detect/image
 
 # ── /api/v1 versioned aliases ─────────────────────────────────────────────────
 from fastapi import APIRouter
@@ -112,6 +114,7 @@ v1.include_router(agent.router)
 v1.include_router(realtime.router)
 v1.include_router(extension.router)
 v1.include_router(media.router)
+v1.include_router(ml_endpoints.router)
 app.include_router(v1)
 
 

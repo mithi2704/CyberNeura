@@ -39,9 +39,9 @@ export async function executeURLScan(url: string, userId?: string): Promise<URLS
   return scanRecord;
 }
 
-export async function fetchURLScans(): Promise<URLScan[]> {
+export async function fetchURLScans(pageSize: number = 100): Promise<URLScan[]> {
   try {
-    const res = await aiClient.get('/scans?page=1&page_size=50');
+    const res = await aiClient.get(`/scans?page=1&page_size=${pageSize}`);
     if (res.data && Array.isArray(res.data.items)) {
       return res.data.items.map((it: any) => ({
         id: it.id,

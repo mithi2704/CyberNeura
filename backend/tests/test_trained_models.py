@@ -57,7 +57,7 @@ def test_url_model_malicious_inferences():
 
 def test_image_synthetic_detector_trained_model():
     """Verify that the Image Synthetic Detector loads trained weights and performs inference."""
-    weights_path = Path("ml/models/image_detector.pth")
+    weights_path = Path("ml/models/image_detector.pth") if Path("ml/models/image_detector.pth").exists() else Path("backend/ml/models/image_detector.pth")
     assert weights_path.exists(), "Trained image detector weights should exist"
 
     model = ImageDetectionModel()

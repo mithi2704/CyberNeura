@@ -38,14 +38,24 @@ def _db_to_summary(row: dict) -> dict:
 async def list_scans(
     user: AuthUser,
     page: int = Query(1, ge=1),
-    page_size: int = Query(20, ge=1, le=100),
+    page_size: int = Query(20, ge=1, le=500),
     search: Optional[str] = Query(None),
     prediction: Optional[str] = Query(None),
 ):
+    # Unified operational store (guarantees complete scan history from the beginning)
+    result = scan_store.get_scans(page=page, page_size=page_size, search=search, prediction=prediction)
+    if result["total"] > 0:
+        items = [_db_to_summary(r) for r in result["items"]]
+        return ScanListResponse(
+            items=items,
+            page=result["page"],
+            pageSize=result["pageSize"],
+            total=result["total"],
+            totalPages=result["totalPages"],
+        )
+
     db = get_db()
     if db is None:
-        # Fast in-memory real-time store
-        result = scan_store.get_scans(page=page, page_size=page_size, search=search, prediction=prediction)
         items = [_db_to_summary(r) for r in result["items"]]
         return ScanListResponse(
             items=items,

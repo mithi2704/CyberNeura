@@ -304,6 +304,43 @@ class ExtensionService:
             },
         )
 
+        # Primary Dashboard & URL Logs live update event
+        await event_publisher.publish(
+            event_type=RealtimeEventType.SCAN_COMPLETED,
+            entity_type=EntityType.URL_SCAN,
+            entity_id=response.scan_id or response.request_id,
+            user_id=user_id,
+            payload={
+                "id": response.scan_id or response.request_id,
+                "url": response.url,
+                "riskScore": response.risk_score,
+                "prediction": response.prediction.lower(),
+                "confidence": response.confidence,
+                "threatCategory": response.threat_category or ("Safe" if response.prediction.lower() == "safe" else "Phishing"),
+                "sslStatus": "valid" if response.url.startswith("https://") else "none",
+                "scannedAt": response.analysis_timestamp,
+                "severity": getattr(response.severity, "value", str(response.severity)) if response.severity else "LOW",
+                "summary": response.summary,
+            },
+        )
+
+        # Live Threat Intelligence broadcast if suspicious or malicious
+        if response.risk_score >= 30 or response.prediction.lower() in ("suspicious", "malicious"):
+            await event_publisher.publish(
+                event_type=RealtimeEventType.THREAT_DETECTED,
+                entity_type=EntityType.URL_SCAN,
+                entity_id=response.scan_id or response.request_id,
+                user_id=user_id,
+                payload={
+                    "scan_id": response.scan_id or response.request_id,
+                    "url": response.url,
+                    "provider": "Browser Protection",
+                    "threat_category": response.threat_category or "Phishing",
+                    "severity": getattr(response.severity, "value", str(response.severity)) if response.severity else "HIGH",
+                    "risk_score": response.risk_score,
+                },
+            )
+
         # Action-specific real-time notifications
         if response.decision == ExtensionDecision.BLOCK:
             await event_publisher.publish(

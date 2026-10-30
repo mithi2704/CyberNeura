@@ -1,0 +1,22 @@
+{
+  "model_type": "url_threat_classifier",
+  "model_name": "CyberNeura URL Threat Classifier",
+  "version": "2.1.0",
+  "architecture": "RandomForestClassifier",
+  "n_estimators": 150,
+  "max_depth": 18,
+  "n_features": 28,
+  "classes": [
+    "LEGITIMATE",
+    "PHISHING"
+  ],
+  "target_mapping": {
+    "0": "LEGITIMATE",
+    "1": "PHISHING"
+  },
+  "preferred_transformer_id": "CrabInHoney/urlbert-tiny-v6",
+  "alternative_transformer_id": "songhieng/TinyBERT-URL-Detection-1.0",
+  "dataset": "PhiUSIIL Phishing URL Dataset + Cisco Umbrella Top-1M + Curated Benchmark",
+  "created_at": "2026-10-30"
+}
+

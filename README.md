@@ -1,6 +1,14 @@
 # CyberNeura: AI-Powered Cybersecurity Threat Detection Platform
 
-CyberNeura is a modern, enterprise-grade cybersecurity threat detection platform combining machine learning URL analysis with real-time multi-source external threat intelligence feeds.
+CyberNeura is a modern, enterprise-grade cybersecurity threat detection platform combining machine learning URL analysis, deep-learning AI image detection, and real-time multi-source external threat intelligence feeds.
+
+> **Execution Guide:** See [runproject.md](file:///e:/CyberNeura/runproject.md) for full setup, execution, and endpoint verification steps.
+> **ML Documentation:**
+> - [ML Project Audit](file:///e:/CyberNeura/docs/ML_PROJECT_AUDIT.md)
+> - [Dataset Analysis](file:///e:/CyberNeura/docs/DATASET_ANALYSIS.md)
+> - [Model Evaluation](file:///e:/CyberNeura/docs/ML_MODEL_EVALUATION.md)
+> - [Colab URLBERT Training Notebook](file:///e:/CyberNeura/notebooks/CyberNeura_URL_Model_Training.ipynb)
+> - [Colab Image ViT Training Notebook](file:///e:/CyberNeura/notebooks/CyberNeura_Image_Model_Training.ipynb)
 
 ---
 

@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Dict, Any, Optional, Tuple
 
 from app.utils.logger import get_logger
-from app.services.feature_extractor import FEATURE_ORDER, get_feature_vector
+from app.services.feature_extractor import FEATURE_ORDER, get_feature_vector, extract_features
 
 logger = get_logger(__name__)
 
@@ -27,13 +27,25 @@ def _load_model(model_path: str, metadata_path: str) -> bool:
         import joblib
         p = Path(model_path)
         if not p.exists():
-            logger.warning(f"Model file not found at {model_path}")
-            return False
+            backend_base = Path(__file__).resolve().parent.parent.parent
+            if (backend_base / model_path).exists():
+                p = backend_base / model_path
+            else:
+                logger.warning(f"Model file not found at {model_path}")
+                return False
 
         _model = joblib.load(p)
-        logger.info(f"ML model loaded from {model_path}")
+        # Ensure single-thread inference in web processes to prevent asyncio loky deadlocks
+        if hasattr(_model, "n_jobs"):
+            _model.n_jobs = 1
+        logger.info(f"ML model loaded from {p}")
 
         mp = Path(metadata_path)
+        if not mp.exists():
+            backend_base = Path(__file__).resolve().parent.parent.parent
+            if (backend_base / metadata_path).exists():
+                mp = backend_base / metadata_path
+
         if mp.exists():
             with open(mp) as f:
                 _metadata = json.load(f)
@@ -88,14 +100,62 @@ def _predict_with_model(vector: list, features: Dict[str, Any]) -> Tuple[str, fl
         if n_classes == 2:
             # Binary classification: 0 = safe, 1 = malicious/phishing
             probability = float(proba[1])
-            class_idx = int(proba.argmax())
-            confidence = float(proba[class_idx]) * 100
+
+            reg_domain = features.get("registered_domain") or ""
+            url_str = features.get("url") or ""
+            if not reg_domain and url_str:
+                from app.services.risk_engine import _get_registered_domain
+                reg_domain = _get_registered_domain(url_str)
+
+            # 1. Verified authority domains (e.g. google.com, cloudflare.com, supabase.com, canva.com)
+            from app.services.risk_engine import is_verified_authority_domain
+            if reg_domain and is_verified_authority_domain(reg_domain, features):
+                probability = min(probability, 0.01)
+
+            # 2. Legitimate domain deep-routing / path bias neutralization:
+            # In academic datasets, benign URLs were apex homepages and phishing had deep paths.
+            # For legitimate registered domains without spoofing or phishing indicators,
+            # we evaluate the apex domain to ensure normal web routing is never classified as phishing.
+            elif (
+                reg_domain
+                and not features.get("has_ip_hostname")
+                and not features.get("has_at_symbol")
+                and not features.get("uses_punycode")
+                and not features.get("has_brand_in_subdomain")
+                and not features.get("is_suspicious_tld")
+                and not features.get("has_phishing_keyword")
+            ):
+                apex_f = extract_features(f"https://{reg_domain}")
+                apex_vec = get_feature_vector(apex_f)
+                apex_prob = float(_model.predict_proba([apex_vec])[0][1])
+                if apex_prob < 0.20:
+                    probability = min(probability, max(0.01, apex_prob * 1.5))
+
+            # 3. Phishing with free HTTPS neutralization (only when real threat indicators exist)
+            elif features.get("uses_https"):
+                suspicious_indicators = (
+                    features.get("has_ip_hostname", 0)
+                    or features.get("has_at_symbol", 0)
+                    or features.get("num_subdomains", 0) >= 3
+                    or features.get("has_phishing_keyword", 0) > 0
+                    or features.get("url_entropy", 0) > 4.8
+                )
+                if suspicious_indicators:
+                    features_neutral = dict(features)
+                    features_neutral["uses_https"] = 0
+                    vector_neutral = get_feature_vector(features_neutral)
+                    proba_neutral = float(_model.predict_proba([vector_neutral])[0][1])
+                    if proba_neutral >= 0.50:
+                        probability = max(probability, proba_neutral)
+
             if probability >= 0.70:
                 prediction = "malicious"
             elif probability >= 0.30:
                 prediction = "suspicious"
             else:
                 prediction = "safe"
+
+            confidence = max(probability, 1.0 - probability) * 100.0
         elif n_classes >= 3:
             # Multi-class: 0 = safe, 1 = suspicious, 2 = malicious
             class_idx = int(proba.argmax())

@@ -11,11 +11,12 @@ from typing import Dict, Any
 
 import tldextract
 
-# Suspicious TLDs commonly associated with abuse
+_tld_extractor = tldextract.TLDExtract(suffix_list_urls=None)
+
+# Abusive/spam high-risk TLDs commonly associated with free/disposable phishing domains
 SUSPICIOUS_TLDS = {
-    "ru", "tk", "ml", "ga", "cf", "gq", "xyz", "top",
-    "club", "online", "site", "info", "biz", "pw",
-    "cn", "cc", "ws", "in", "vn", "br",
+    "tk", "ml", "ga", "cf", "gq", "top", "xyz", "club",
+    "work", "click", "loan", "fit", "surf", "pw", "buzz",
 }
 
 PHISHING_KEYWORDS = {
@@ -55,7 +56,7 @@ def extract_features(url: str) -> Dict[str, Any]:
     path = parsed.path or ""
     query = parsed.query or ""
     fragment = parsed.fragment or ""
-    ext = tldextract.extract(raw_url)
+    ext = _tld_extractor(raw_url)
 
     domain = ext.domain or hostname
     suffix = ext.suffix or ""
@@ -82,7 +83,8 @@ def extract_features(url: str) -> Dict[str, Any]:
     # ── Security indicators ────────────────────────────────────
     uses_https = parsed.scheme == "https"
     has_ip_hostname = _is_ip_address(hostname)
-    is_suspicious_tld = suffix.split(".")[-1].lower() in SUSPICIOUS_TLDS if suffix else False
+    is_institutional_tld = any(part in suffix.lower() for part in ("edu", "gov", "mil", "ac")) if suffix else False
+    is_suspicious_tld = (suffix.split(".")[-1].lower() in SUSPICIOUS_TLDS) if (suffix and not is_institutional_tld) else False
     has_phishing_keyword = any(kw in raw_url.lower() for kw in PHISHING_KEYWORDS)
     has_at_symbol = "@" in raw_url
     has_double_slash = "//" in path
@@ -130,6 +132,10 @@ def extract_features(url: str) -> Dict[str, Any]:
         # Entropy
         "url_entropy": round(url_entropy, 4),
         "domain_entropy": round(domain_entropy, 4),
+        # Metadata
+        "url": raw_url,
+        "hostname": hostname,
+        "registered_domain": (ext.top_domain_under_public_suffix if hasattr(ext, "top_domain_under_public_suffix") and ext.top_domain_under_public_suffix else (getattr(ext, "domain", "") or domain)).lower(),
     }
 
     return features

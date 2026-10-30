@@ -32,8 +32,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   let currentTabStatus: TabStatusResponse | null = null;
 
-  // 1. Fetch current tab security status from service-worker
-  chrome.runtime.sendMessage({ type: 'GET_TAB_STATUS' }, (status: TabStatusResponse) => {
+  function renderStatus(status: TabStatusResponse) {
     currentTabStatus = status;
     if (!status || !status.url) {
       if (domainText) domainText.textContent = 'No active webpage';
@@ -81,6 +80,46 @@ document.addEventListener('DOMContentLoaded', async () => {
         liveBadge.className = 'status-badge';
         badgeText.textContent = 'Protected';
       }
+    }
+  }
+
+  // Fast path: Immediately query active tab URL so domain is displayed without delay
+  chrome.tabs.query({ active: true, currentWindow: true }).then(async (tabs) => {
+    const activeTab = tabs[0];
+    if (activeTab && activeTab.url) {
+      const domain = extractDisplayDomain(activeTab.url);
+      if (domainText && domainText.textContent === 'Loading current site...') {
+        domainText.textContent = domain;
+      }
+      // Check local cache directly as fast fallback
+      const cached = await storageManager.getCachedAnalysis(activeTab.url);
+      if (cached && (!currentTabStatus || !currentTabStatus.isInspected)) {
+        renderStatus({
+          tabId: activeTab.id || 0,
+          url: activeTab.url,
+          isInspected: true,
+          decision: cached.decision,
+          riskScore: cached.riskScore,
+          prediction: cached.prediction,
+          confidence: cached.confidence,
+          threatCategory: cached.threatCategory,
+          summary: cached.summary,
+          reasons: cached.reasons,
+          recommendations: cached.recommendations,
+          scanId: cached.scanId,
+          isCached: true,
+        });
+      }
+    }
+  }).catch(() => {});
+
+  // 1. Fetch current tab security status from service-worker
+  chrome.runtime.sendMessage({ type: 'GET_TAB_STATUS' }, (status: TabStatusResponse) => {
+    if (chrome.runtime.lastError) {
+      console.debug('GET_TAB_STATUS lastError:', chrome.runtime.lastError.message);
+    }
+    if (status) {
+      renderStatus(status);
     }
   });
 

@@ -30,21 +30,26 @@ def _row_to_threat(row: dict) -> dict:
 async def list_threats(
     user: AuthUser,
     page: int = Query(1, ge=1),
-    page_size: int = Query(20, ge=1, le=100),
+    page_size: int = Query(20, ge=1, le=500),
     severity: Optional[str] = Query(None),
     category: Optional[str] = Query(None),
     status: Optional[str] = Query(None),
     search: Optional[str] = Query(None),
 ):
+    # Unified operational store (guarantees complete threat history from the beginning)
+    result = scan_store.get_threats(
+        page=page,
+        page_size=page_size,
+        severity=severity,
+        category=category,
+        search=search,
+    )
+    if result["total"] > 0:
+        return result
+
     db = get_db()
     if db is None:
-        return scan_store.get_threats(
-            page=page,
-            page_size=page_size,
-            severity=severity,
-            category=category,
-            search=search,
-        )
+        return result
 
     try:
         q = db.table("threat_logs").select("*").order("timestamp", desc=True)

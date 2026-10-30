@@ -2,9 +2,9 @@ import { supabase, isSupabaseConfigured } from '../lib/supabase/client';
 import { aiClient } from '../lib/api/aiService';
 import type { ThreatLog } from '../types';
 
-export async function fetchThreatLogs(): Promise<ThreatLog[]> {
+export async function fetchThreatLogs(pageSize: number = 100): Promise<ThreatLog[]> {
   try {
-    const res = await aiClient.get('/threats?page=1&page_size=50');
+    const res = await aiClient.get(`/threats?page=1&page_size=${pageSize}`);
     if (res.data && Array.isArray(res.data.items)) {
       return res.data.items.map((t: any) => ({
         id: t.id,

@@ -8,36 +8,36 @@ from app.risk.models import RiskBand
 from app.evidence.models import EvidenceSeverity
 
 DEFAULT_THRESHOLDS: Dict[str, int] = {
-    "safe": 20,         # 0-19: SAFE
-    "low": 40,          # 20-39: LOW
-    "suspicious": 60,   # 40-59: SUSPICIOUS
-    "high": 80,         # 60-79: HIGH
-    "malicious": 80,    # 80-100: CRITICAL / MALICIOUS
+    "safe": 30,         # 0-29: SAFE
+    "low": 45,          # 30-44: LOW
+    "suspicious": 60,   # 45-69: SUSPICIOUS
+    "high": 70,         # 70-84: HIGH
+    "malicious": 70,    # 70-100: CRITICAL / MALICIOUS
 }
 
 
 def score_to_band(score: int) -> RiskBand:
     """Map 0-100 score to fine-grained RiskBand."""
-    if score < 20:
+    if score < 30:
         return RiskBand.SAFE
-    if score < 40:
+    if score < 45:
         return RiskBand.LOW
     if score < 60:
         return RiskBand.SUSPICIOUS
-    if score < 80:
+    if score < 70:
         return RiskBand.HIGH
     return RiskBand.CRITICAL
 
 
 def score_to_severity(score: int) -> EvidenceSeverity:
     """Map 0-100 score to EvidenceSeverity."""
-    if score < 20:
+    if score < 30:
         return EvidenceSeverity.INFO
-    if score < 40:
+    if score < 45:
         return EvidenceSeverity.LOW
     if score < 60:
         return EvidenceSeverity.MEDIUM
-    if score < 80:
+    if score < 70:
         return EvidenceSeverity.HIGH
     return EvidenceSeverity.CRITICAL
 
@@ -45,10 +45,14 @@ def score_to_severity(score: int) -> EvidenceSeverity:
 def score_to_prediction(score: int, independent_confirmations: int = 0) -> str:
     """
     Map score to legacy frontend 3-state prediction ('safe', 'suspicious', 'malicious').
-    Preserves existing UI contracts.
+    Preserves existing UI contracts:
+    - Score < 30: 'safe'
+    - Score 30-69: 'suspicious'
+    - Score >= 70 or confirmed threat intel: 'malicious'
     """
-    if independent_confirmations >= 1 or score >= 80:
+    if independent_confirmations >= 1 or score >= 70:
         return "malicious"
-    if score >= 40:
+    if score >= 30:
         return "suspicious"
     return "safe"
+
